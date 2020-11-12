@@ -1,2 +1,0 @@
-/inference/ filter=lfs diff=lfs merge=lfs -text
-inference/ch_ppocr_server_v1.1_rec_infer/params filter=lfs diff=lfs merge=lfs -text

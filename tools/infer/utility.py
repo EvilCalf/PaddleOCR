@@ -41,7 +41,7 @@ def parse_args():
     parser.add_argument("--gpu_mem", type=int, default=8000)
 
     # params for text detector
-    parser.add_argument("--image_dir", type=str,default="inference_data")
+    parser.add_argument("--image_dir", type=str,default="test")
     parser.add_argument("--det_algorithm", type=str, default='DB')
     parser.add_argument("--det_model_dir", type=str,default='./inference/ch_ppocr_server_v1.1_det_infer/')
     parser.add_argument("--det_max_side_len", type=float, default=960)
@@ -243,11 +243,11 @@ def draw_ocr_box_txt(image,
         color = (random.randint(0, 255), random.randint(0, 255),
                  random.randint(0, 255))
         draw_left.polygon(box, fill=color)
-        draw_right.polygon(
-            [
-                box[0][0], box[0][1], box[1][0], box[1][1], box[2][0],
-                box[2][1], box[3][0], box[3][1]
-            ])
+        # draw_right.polygon(
+        #     [
+        #         box[0][0], box[0][1], box[1][0], box[1][1], box[2][0],
+        #         box[2][1], box[3][0], box[3][1]
+        #     ])
         # draw_right.polygon(
         #     [
         #         box[0][0], box[0][1], box[1][0], box[1][1], box[2][0],
@@ -276,7 +276,7 @@ def draw_ocr_box_txt(image,
     img_show = Image.new('RGB', (w * 2, h), (255, 255, 255))
     img_show.paste(img_left, (0, 0, w, h))
     img_show.paste(img_right, (w, 0, w * 2, h))
-    return np.array(img_show)
+    return img_show
 
 
 def str_count(s):

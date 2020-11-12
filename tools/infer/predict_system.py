@@ -146,33 +146,38 @@ def main(args):
                         logger.info("error in loading image:{}".format(image_file))
                         continue
                     starttime = time.time()
-                    dt_boxes, rec_res = text_sys(img)
+                    img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+                    img_bilater = cv2.bilateralFilter(img_gray, 5, 75, 75)
+                    img_bilater=cv2.cvtColor(img_bilater,cv2.COLOR_GRAY2BGR)
+                    dt_boxes, rec_res = text_sys(img_bilater)
+                    roi=()
+                    name_box=[]
                     for i, val in enumerate(rec_res):
                         if "姓名" in val[0]:
                             if len(val[0])<4:
+                                name_box=dt_boxes(i+1)
                                 rec_res.pop(i+1)
                                 dt_boxes.pop(i+1)
                             else:
+                                name_box=dt_boxes(i)
                                 rec_res.pop(i)
                                 dt_boxes.pop(i)
                             continue
-                        if "名" in val[0] and len(val[0])<=5:
-                            rec_res.pop(i+1)
-                            dt_boxes.pop(i+1)
-                            rec_res.pop(i)
-                            dt_boxes.pop(i)
-                            continue                                                                        
+                        if "名" in val[0]:
+                            if len(val[0])<=2:
+                                name_box=dt_boxes(i+1)
+                                rec_res.pop(i+1)
+                                dt_boxes.pop(i+1)
+                            elif len(val[0])<=5:
+                                name_box=dt_boxes(i)
+                                rec_res.pop(i)
+                                dt_boxes.pop(i)
+                            continue   
+                    roi=(name_box[0][0],name_box[0][1],name_box[2][0],name_box[2][1])                                                                     
                     elapse = time.time() - starttime
                     print("Predict time of %s: %.3fs" % (image_file, elapse))
             
                     drop_score = 0.5
-                    json_img_save="./inference_results_json/"+root.replace("inferenc_data\\","")
-                    if not os.path.exists(json_img_save):
-                        os.makedirs(json_img_save)
-                    with open(json_img_save+"/"+file.replace(".jpg", "")+".json", 'w', encoding='utf-8') as file_obj:
-                        ans_json = {'data': [{'str': i[0]}
-                                             for i in rec_res]}
-                        json.dump(ans_json, file_obj, indent=4, ensure_ascii=False)
             
                     if is_visualize:
                         image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
@@ -187,7 +192,9 @@ def main(args):
                             scores,
                             drop_score=drop_score,
                             font_path=font_path)
-                        draw_img_save = "./inference_results/"+root.replace("inferenc_data\\","")
+                        draw_img.paste((0,0,0),roi)
+                        draw_img=np.array(draw_img)
+                        draw_img_save = "./inference_results/"+root.replace(args.image_dir+"\\","")
                         if not os.path.exists(draw_img_save):
                             os.makedirs(draw_img_save)
                         cv2.imwrite(

@@ -1,0 +1,76 @@
+# Vue
+.DS_Store
+node_modules
+/dist
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intel Idea
+.idea
+*.iml
+*.iws
+
+# Maven
+log
+target
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionBackup
+pom.xml.next
+release.properties
+dependcy-reduced-pom.xml
+buildNumber.properties
+
+# java
+*.class
+*.war
+*.ear
+
+# bak
+*.bak
+/bin/
+
+# sbt
+/target/
+/project/target/
+/project/project/target/
+/project/project/project/target/
+/build-sbt/
+local.sbt
+
+# spring
+*.springBeans
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# python
+__pycache__
+
+# VSC Counter
+/.VSCodeCounter/
+
+# cache
+/Cache/*.jpg
+/inference/
+/inference_data/
+/inference_results/
+/inference_results_json/

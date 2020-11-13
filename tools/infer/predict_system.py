@@ -173,7 +173,7 @@ def main(args):
                                 rec_res.pop(i)
                                 dt_boxes.pop(i)
                             continue   
-                    roi=(name_box[0][0],name_box[0][1],name_box[2][0],name_box[2][1])                                                                     
+                    roi=(int(name_box[0][0]),int(name_box[0][1]),int(name_box[2][0]),int(name_box[2][1]))                                                                     
                     elapse = time.time() - starttime
                     print("Predict time of %s: %.3fs" % (image_file, elapse))
             

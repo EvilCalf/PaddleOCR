@@ -41,7 +41,7 @@ def parse_args():
     parser.add_argument("--gpu_mem", type=int, default=8000)
 
     # params for text detector
-    parser.add_argument("--image_dir", type=str,default="test")
+    parser.add_argument("--image_dir", type=str,default="inference_data")
     parser.add_argument("--det_algorithm", type=str, default='DB')
     parser.add_argument("--det_model_dir", type=str,default='./inference/ch_ppocr_server_v1.1_det_infer/')
     parser.add_argument("--det_max_side_len", type=float, default=960)

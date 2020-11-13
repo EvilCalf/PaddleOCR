@@ -151,25 +151,25 @@ def main(args):
                     img_bilater=cv2.cvtColor(img_bilater,cv2.COLOR_GRAY2BGR)
                     dt_boxes, rec_res = text_sys(img_bilater)
                     roi=()
-                    name_box=[]
+                    name_box=np.empty(shape=(4,2))
                     for i, val in enumerate(rec_res):
                         if "姓名" in val[0]:
                             if len(val[0])<4:
-                                name_box=dt_boxes(i+1)
+                                name_box=dt_boxes[i+1]
                                 rec_res.pop(i+1)
                                 dt_boxes.pop(i+1)
                             else:
-                                name_box=dt_boxes(i)
+                                name_box=dt_boxes[i]
                                 rec_res.pop(i)
                                 dt_boxes.pop(i)
                             continue
                         if "名" in val[0]:
                             if len(val[0])<=2:
-                                name_box=dt_boxes(i+1)
+                                name_box=dt_boxes[i+1]
                                 rec_res.pop(i+1)
                                 dt_boxes.pop(i+1)
                             elif len(val[0])<=5:
-                                name_box=dt_boxes(i)
+                                name_box=dt_boxes[i]
                                 rec_res.pop(i)
                                 dt_boxes.pop(i)
                             continue   

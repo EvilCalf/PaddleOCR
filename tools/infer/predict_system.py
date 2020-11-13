@@ -158,26 +158,23 @@ def main(args):
                                 name_box=dt_boxes[i+1]
                                 rec_res.pop(i+1)
                                 dt_boxes.pop(i+1)
+                                break
                             else:
                                 name_box=dt_boxes[i]
                                 rec_res.pop(i)
                                 dt_boxes.pop(i)
-                            break
+                                break
                         if "名" in val[0]:
                             if len(val[0])<=2:
                                 name_box=dt_boxes[i+1]
                                 rec_res.pop(i+1)
                                 dt_boxes.pop(i+1)
+                                break
                             elif len(val[0])<=6:
                                 name_box=dt_boxes[i]
                                 rec_res.pop(i)
                                 dt_boxes.pop(i)
-                            break
-                        if "姓" in val[0]:
-                            name_box=dt_boxes[i]
-                            rec_res.pop(i)
-                            dt_boxes.pop(i)
-                            break      
+                                break     
                     roi=(int(name_box[0][0]),int(name_box[0][1]),int(name_box[2][0]),int(name_box[2][1]))                                                                     
                     elapse = time.time() - starttime
                     print("Predict time of %s: %.3fs" % (image_file, elapse))

@@ -73,9 +73,9 @@ class TextSystem(object):
             M, (img_crop_width, img_crop_height),
             borderMode=cv2.BORDER_REPLICATE,
             flags=cv2.INTER_CUBIC)
-        dst_img_height, dst_img_width = dst_img.shape[0:2]
-        if dst_img_height * 1.0 / dst_img_width >= 1.5:
-            dst_img = np.rot90(dst_img)
+        # dst_img_height, dst_img_width = dst_img.shape[0:2]
+        # if dst_img_height * 1.0 / dst_img_width >= 1.5:
+        #     dst_img = np.rot90(dst_img)
         return dst_img
 
     def print_draw_crop_rec_res(self, img_crop_list, rec_res):

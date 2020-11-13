@@ -146,10 +146,10 @@ def main(args):
                         logger.info("error in loading image:{}".format(image_file))
                         continue
                     starttime = time.time()
-                    img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-                    img_bilater = cv2.bilateralFilter(img_gray, 5, 75, 75)
-                    img_bilater=cv2.cvtColor(img_bilater,cv2.COLOR_GRAY2BGR)
-                    dt_boxes, rec_res = text_sys(img_bilater)
+                    # img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+                    # img_bilater = cv2.bilateralFilter(img_gray, 5, 75, 75)
+                    # img_bilater=cv2.cvtColor(img_bilater,cv2.COLOR_GRAY2BGR)
+                    dt_boxes, rec_res = text_sys(img)
                     roi=()
                     name_box=np.empty(shape=(4,2))
                     for i, val in enumerate(rec_res):
@@ -168,7 +168,7 @@ def main(args):
                                 name_box=dt_boxes[i+1]
                                 rec_res.pop(i+1)
                                 dt_boxes.pop(i+1)
-                            elif len(val[0])<=5:
+                            elif len(val[0])<=6:
                                 name_box=dt_boxes[i]
                                 rec_res.pop(i)
                                 dt_boxes.pop(i)

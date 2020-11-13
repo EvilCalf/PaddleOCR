@@ -178,7 +178,15 @@ def main(args):
                     print("Predict time of %s: %.3fs" % (image_file, elapse))
             
                     drop_score = 0.5
-            
+
+                    json_img_save="./inference_results_json/"+root.replace("inferenc_data\\","")
+                    if not os.path.exists(json_img_save):
+                        os.makedirs(json_img_save)
+                    with open(json_img_save+"/"+file.replace(".jpg", "")+".json", 'w', encoding='utf-8') as file_obj:
+                        ans_json = {'data': [{'str': i[0]}
+                                             for i in rec_res]}
+                        json.dump(ans_json, file_obj, indent=4, ensure_ascii=False)
+                    
                     if is_visualize:
                         image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
                         boxes = dt_boxes

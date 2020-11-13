@@ -179,7 +179,7 @@ def main(args):
             
                     drop_score = 0.5
 
-                    json_img_save="./inference_results_json/"+root.replace("inferenc_data\\","")
+                    json_img_save="./inference_results_json/"+root.replace(args.image_dir+"\\","")
                     if not os.path.exists(json_img_save):
                         os.makedirs(json_img_save)
                     with open(json_img_save+"/"+file.replace(".jpg", "")+".json", 'w', encoding='utf-8') as file_obj:

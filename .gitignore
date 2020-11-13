@@ -74,3 +74,4 @@ __pycache__
 /inference_data/
 /inference_results/
 /inference_results_json/
+/test/

@@ -149,6 +149,7 @@ def main(args):
                     # img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
                     # img_bilater = cv2.bilateralFilter(img_gray, 5, 75, 75)
                     # img_bilater=cv2.cvtColor(img_bilater,cv2.COLOR_GRAY2BGR)
+                    # dt_boxes, rec_res = text_sys(img_bilater)
                     dt_boxes, rec_res = text_sys(img)
                     roi=()
                     name_box=np.empty(shape=(4,2))

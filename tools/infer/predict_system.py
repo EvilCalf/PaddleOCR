@@ -129,6 +129,7 @@ def sorted_boxes(dt_boxes):
             _boxes[i + 1] = tmp
     return _boxes
 
+
 def main(args):
     for root, dirs, files in os.walk(args.image_dir):
         for file in files:
@@ -143,59 +144,67 @@ def main(args):
                     if not flag:
                         img = cv2.imread(image_file)
                     if img is None:
-                        logger.info("error in loading image:{}".format(image_file))
+                        logger.info(
+                            "error in loading image:{}".format(image_file))
                         continue
                     starttime = time.time()
-                    # img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-                    # img_bilater = cv2.bilateralFilter(img_gray, 5, 75, 75)
-                    # img_bilater=cv2.cvtColor(img_bilater,cv2.COLOR_GRAY2BGR)
-                    # dt_boxes, rec_res = text_sys(img_bilater)
-                    dt_boxes, rec_res = text_sys(img)
-                    roi=()
-                    name_box=np.empty(shape=(4,2))
+                    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    # img_filter = cv2.bilateralFilter(img_gray, 5, 100, 100)
+                    img_filter = cv2.blur(img_gray, (5, 5))
+                    # img_filter = cv2.GaussianBlur(img_gray, (5, 5), 0)
+                    # img_filter = cv2.medianBlur(img_gray, 5)
+                    img_filter = cv2.cvtColor(img_filter, cv2.COLOR_GRAY2BGR)
+                    dt_boxes, rec_res = text_sys(img_filter)
+                    # dt_boxes, rec_res = text_sys(img)
+                    roi = ()
+                    name_box = np.empty(shape=(4, 2))
                     for i, val in enumerate(rec_res):
                         if "姓名" in val[0]:
-                            if len(val[0])<4:
-                                name_box=dt_boxes[i+1]
+                            if len(val[0]) < 4:
+                                name_box = dt_boxes[i+1]
                                 rec_res.pop(i+1)
                                 dt_boxes.pop(i+1)
                                 break
                             else:
-                                name_box=dt_boxes[i]
+                                name_box = dt_boxes[i]
                                 rec_res.pop(i)
                                 dt_boxes.pop(i)
                                 break
                         if "名" in val[0]:
-                            if len(val[0])<=2:
-                                name_box=dt_boxes[i+1]
+                            if len(val[0]) <= 2:
+                                name_box = dt_boxes[i+1]
                                 rec_res.pop(i+1)
                                 dt_boxes.pop(i+1)
                                 break
-                            elif len(val[0])<=6:
-                                name_box=dt_boxes[i]
+                            elif len(val[0]) <= 6:
+                                name_box = dt_boxes[i]
                                 rec_res.pop(i)
                                 dt_boxes.pop(i)
-                                break     
-                    roi=(int(name_box[0][0]),int(name_box[0][1]),int(name_box[2][0]),int(name_box[2][1]))                                                                     
+                                break
+                    roi = (int(name_box[0][0]), int(name_box[0][1]), int(
+                        name_box[2][0]), int(name_box[2][1]))
                     elapse = time.time() - starttime
                     print("Predict time of %s: %.3fs" % (image_file, elapse))
-            
+
                     drop_score = 0.5
 
-                    json_img_save="./inference_results_json/"+root.replace(args.image_dir+"\\","")
+                    json_img_save = "./inference_results_json/" + \
+                        root.replace(args.image_dir+"\\", "")
                     if not os.path.exists(json_img_save):
                         os.makedirs(json_img_save)
                     with open(json_img_save+"/"+file.replace(".jpg", "")+".json", 'w', encoding='utf-8') as file_obj:
                         ans_json = {'data': [{'str': i[0]}
                                              for i in rec_res]}
-                        json.dump(ans_json, file_obj, indent=4, ensure_ascii=False)
-                    
+                        json.dump(ans_json, file_obj,
+                                  indent=4, ensure_ascii=False)
+
                     if is_visualize:
-                        image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+                        image = Image.fromarray(
+                            cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
                         boxes = dt_boxes
                         txts = [rec_res[i][0] for i in range(len(rec_res))]
                         scores = [rec_res[i][1] for i in range(len(rec_res))]
-            
+
                         draw_img = draw_ocr_box_txt(
                             image,
                             boxes,
@@ -203,17 +212,19 @@ def main(args):
                             scores,
                             drop_score=drop_score,
                             font_path=font_path)
-                        draw_img.paste((0,0,0),roi)
-                        draw_img=np.array(draw_img)
-                        draw_img_save = "./inference_results/"+root.replace(args.image_dir+"\\","")
+                        draw_img.paste((0, 0, 0), roi)
+                        draw_img = np.array(draw_img)
+                        draw_img_save = "./inference_results/" + \
+                            root.replace(args.image_dir+"\\", "")
                         if not os.path.exists(draw_img_save):
                             os.makedirs(draw_img_save)
                         cv2.imwrite(
-                            os.path.join(draw_img_save, os.path.basename(image_file)),
+                            os.path.join(
+                                draw_img_save, os.path.basename(image_file)),
                             draw_img[:, :, ::-1])
                         print("The visualized image saved in {}".format(
                             os.path.join(draw_img_save, os.path.basename(image_file))))
 
 
 if __name__ == "__main__":
-    main(utility.parse_args())   
+    main(utility.parse_args())

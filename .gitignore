@@ -68,10 +68,7 @@ __pycache__
 # VSC Counter
 /.VSCodeCounter/
 
-# cache
-/Cache/*.jpg
 /inference/
 /inference_data/
 /inference_results/
 /inference_results_json/
-/test/

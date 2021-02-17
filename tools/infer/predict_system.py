@@ -11,30 +11,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import copy
-import json
-import math
 import os
 import sys
+
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(__dir__)
+sys.path.append(os.path.abspath(os.path.join(__dir__, '../..')))
+
+os.environ["FLAGS_allocator_strategy"] = 'auto_growth'
+
+import copy
+import json
 import time
 
 import cv2
 import numpy as np
-from PIL import Image
-
-os.environ['KMP_DUPLICATE_LIB_OK'] = "True"
-__dir__ = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(__dir__)
-sys.path.append(os.path.abspath(os.path.join(__dir__, '../..')))
 import tools.infer.predict_cls as predict_cls
 import tools.infer.predict_det as predict_det
 import tools.infer.predict_rec as predict_rec
 import tools.infer.utility as utility
-from ppocr.utils.utility import (check_and_read_gif, get_image_file_list,
-                                 initial_logger)
-from tools.infer.utility import draw_ocr, draw_ocr_box_txt
+from PIL import Image
+from ppocr.utils.logging import get_logger
+from ppocr.utils.utility import check_and_read_gif, get_image_file_list
+from tools.infer.utility import draw_ocr_box_txt
 
-logger = initial_logger()
+logger = get_logger()
 
 
 class TextSystem(object):
@@ -42,6 +43,7 @@ class TextSystem(object):
         self.text_detector = predict_det.TextDetector(args)
         self.text_recognizer = predict_rec.TextRecognizer(args)
         self.use_angle_cls = args.use_angle_cls
+        self.drop_score = args.drop_score
         if self.use_angle_cls:
             self.text_classifier = predict_cls.TextClassifier(args)
 
@@ -73,21 +75,22 @@ class TextSystem(object):
             M, (img_crop_width, img_crop_height),
             borderMode=cv2.BORDER_REPLICATE,
             flags=cv2.INTER_CUBIC)
-        # dst_img_height, dst_img_width = dst_img.shape[0:2]
-        # if dst_img_height * 1.0 / dst_img_width >= 1.5:
-        #     dst_img = np.rot90(dst_img)
+        dst_img_height, dst_img_width = dst_img.shape[0:2]
+        if dst_img_height * 1.0 / dst_img_width >= 1.5:
+            dst_img = np.rot90(dst_img)
         return dst_img
 
     def print_draw_crop_rec_res(self, img_crop_list, rec_res):
         bbox_num = len(img_crop_list)
         for bno in range(bbox_num):
             cv2.imwrite("./output/img_crop_%d.jpg" % bno, img_crop_list[bno])
-            print(bno, rec_res[bno])
+            logger.info(bno, rec_res[bno])
 
     def __call__(self, img):
         ori_im = img.copy()
         dt_boxes, elapse = self.text_detector(img)
-        print("dt_boxes num : {}, elapse : {}".format(len(dt_boxes), elapse))
+        logger.info("dt_boxes num : {}, elapse : {}".format(
+            len(dt_boxes), elapse))
         if dt_boxes is None:
             return None, None
         img_crop_list = []
@@ -101,12 +104,20 @@ class TextSystem(object):
         if self.use_angle_cls:
             img_crop_list, angle_list, elapse = self.text_classifier(
                 img_crop_list)
-            print("cls num  : {}, elapse : {}".format(
+            logger.info("cls num  : {}, elapse : {}".format(
                 len(img_crop_list), elapse))
+
         rec_res, elapse = self.text_recognizer(img_crop_list)
-        print("rec_res num  : {}, elapse : {}".format(len(rec_res), elapse))
+        logger.info("rec_res num  : {}, elapse : {}".format(
+            len(rec_res), elapse))
         # self.print_draw_crop_rec_res(img_crop_list, rec_res)
-        return dt_boxes, rec_res
+        filter_boxes, filter_rec_res = [], []
+        for box, rec_reuslt in zip(dt_boxes, rec_res):
+            text, score = rec_reuslt
+            if score >= self.drop_score:
+                filter_boxes.append(box)
+                filter_rec_res.append(rec_reuslt)
+        return filter_boxes, filter_rec_res
 
 
 def sorted_boxes(dt_boxes):
@@ -148,19 +159,19 @@ def main(args):
                             "error in loading image:{}".format(image_file))
                         continue
                     starttime = time.time()
-                    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    # img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                     # img_filter = cv2.bilateralFilter(img_gray, 5, 100, 100)
-                    img_filter = cv2.blur(img_gray, (5, 5))
+                    # img_filter = cv2.blur(img_gray, (5, 5))
                     # img_filter = cv2.GaussianBlur(img_gray, (5, 5), 0)
                     # img_filter = cv2.medianBlur(img_gray, 5)
-                    img_filter = cv2.cvtColor(img_filter, cv2.COLOR_GRAY2BGR)
-                    dt_boxes, rec_res = text_sys(img_filter)
-                    # dt_boxes, rec_res = text_sys(img)
+                    # img_filter = cv2.cvtColor(img_filter, cv2.COLOR_GRAY2BGR)
+                    # dt_boxes, rec_res = text_sys(img_filter)
+                    dt_boxes, rec_res = text_sys(img)
                     roi = ()
                     name_box = np.empty(shape=(4, 2))
                     for i, val in enumerate(rec_res):
                         if "姓名" in val[0]:
-                            if len(val[0]) < 4:
+                            if len(val[0]) < 3:
                                 name_box = dt_boxes[i+1]
                                 rec_res.pop(i+1)
                                 dt_boxes.pop(i+1)
@@ -210,7 +221,7 @@ def main(args):
                             boxes,
                             txts,
                             scores,
-                            drop_score=drop_score,
+                            drop_score=args.drop_score,
                             font_path=font_path)
                         draw_img.paste((0, 0, 0), roi)
                         draw_img = np.array(draw_img)

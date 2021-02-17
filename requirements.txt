@@ -1,7 +1,10 @@
 shapely
-imgaug
+scikit-image==0.17.2
+imgaug==0.4.0
 pyclipper
 lmdb
+opencv-python==4.2.0.32
 tqdm
 numpy
-opencv-python
+visualdl
+python-Levenshtein

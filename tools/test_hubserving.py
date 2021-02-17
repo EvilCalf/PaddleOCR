@@ -17,8 +17,9 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.append(os.path.abspath(os.path.join(__dir__, '..')))
 
-from ppocr.utils.utility import initial_logger
-logger = initial_logger()
+from ppocr.utils.logging import get_logger
+logger = get_logger()
+
 import cv2
 import numpy as np
 import time
@@ -63,7 +64,8 @@ def draw_server_result(image_file, res):
             scores.append(res[dno]['confidence'])
         boxes = np.array(boxes)
         scores = np.array(scores)
-        draw_img = draw_ocr(image, boxes, texts, scores, drop_score=0.5)
+        draw_img = draw_ocr(
+            image, boxes, texts, scores, draw_txt=True, drop_score=0.5)
         return draw_img
 
 
